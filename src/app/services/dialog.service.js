@@ -74,9 +74,9 @@ function dialogService($window, $q, $document, nodejsService) {
     return $q(function(resolve, reject) {
       var value = nodejsService.dialog.showSaveDialog({
         title: 'Save project as...',
-        defaultPath: placeholder + '.b3',
+        defaultPath: placeholder + '.json',
         filters : [
-          {name: 'Behavior3 File', extensions: ['b3', 'json']},
+          {name: 'Behavior3 File', extensions: ['json','b3']},
           {name: 'All Files', extensions: ['*']}
         ]
       });

@@ -1,4 +1,4 @@
-(function() {
+(function () {
   'use strict';
 
   angular
@@ -16,24 +16,24 @@
   ];
 
   function ExportController($scope,
-                            $document,
-                            $window,
-                            $stateParams,
-                            dialogService,
-                            notificationService,
-                            storageService) {
+    $document,
+    $window,
+    $stateParams,
+    dialogService,
+    notificationService,
+    storageService) {
     var vm = this;
-    vm.type        = null;
-    vm.format      = null;
-    vm.compact     = '';
-    vm.pretty      = '';
-    vm.result      = null;
-    vm.data        = null;
+    vm.type = null;
+    vm.format = null;
+    vm.compact = '';
+    vm.pretty = '';
+    vm.result = null;
+    vm.data = null;
     vm.hideCompact = false;
     vm.showCompact = showCompact;
-    vm.showPretty  = showPretty;
-    vm.select      = select;
-    vm.save        = save;
+    vm.showPretty = showPretty;
+    vm.select = select;
+    vm.save = save;
 
     _active();
 
@@ -54,14 +54,37 @@
       }
     }
 
-    function _createJson(data) {
-      vm.data = data;
-      vm.compact = JSON3.stringify(data);
-      vm.pretty = JSON3.stringify(data, null, 2);
-      vm.result = vm.pretty;
+    function ph_convertNumbersToStrings(obj) 
+    {
+      for (var key in obj) {
+          if (typeof obj[key] === 'number') {
+              obj[key] = obj[key].toString();
+          } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            ph_convertNumbersToStrings(obj[key]);
+          }
+      }
     }
 
-    function select(){
+    function _createJson(data) {
+
+      ph_convertNumbersToStrings(data);
+
+      vm.data = data;
+      var compact = JSON3.stringify(data);
+
+      compact = compact.replace(/"/g, '\\"');
+
+      compact = "\""+compact+"\";";
+
+      console.log(compact);
+
+      vm.compact = compact;
+      var pretty = JSON3.stringify(data, null, 2);
+      vm.pretty = pretty;
+      vm.result = compact;
+    }
+
+    function select() {
       var range = $document[0].createRange();
       range.selectNodeContents($document[0].getElementById('export-result'));
       var sel = $window.getSelection();
@@ -72,10 +95,10 @@
     function save() {
       dialogService
         .saveAs(null, ['.b3', '.json'])
-        .then(function(path) {
+        .then(function (path) {
           storageService
-            .saveAsync(path, vm.pretty)
-            .then(function() {
+            .saveAsync(path, vm.compact)
+            .then(function () {
               notificationService.success(
                 'File saved',
                 'The file has been saved successfully.'
